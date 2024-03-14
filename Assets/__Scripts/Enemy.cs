@@ -13,6 +13,9 @@ public class Enemy : MonoBehaviour
 
     public float powerUpDropChance = 1f;
 
+    public GameObject particles;
+    public GameObject boomSound;
+
     [Header("Set Dynamically: Enemy")]
     public Color[] originalColors;
     public Material[] materials;
@@ -94,7 +97,10 @@ public class Enemy : MonoBehaviour
                     }
                     notifiedOfDestruction = true;
                     Destroy(this.gameObject);
-                    print("Enemy destroyed");
+                    GameObject cloneBoom = (GameObject)Instantiate(boomSound, transform.position, Quaternion.identity);
+                    Destroy(cloneBoom, 2.0f);
+                    GameObject cloneParticle= (GameObject)Instantiate(particles, transform.position, Quaternion.identity);
+                    Destroy(cloneParticle, 1.0f);
                 }
                 Destroy(otherGO);
                 break;

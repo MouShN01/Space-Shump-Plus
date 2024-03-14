@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 public class Main : MonoBehaviour
 {
-    static public Main S;
+    public static Main S;
     static Dictionary<WeaponType, WeaponDefinition> WEAP_DICT;
 
     [Header("Set in Inspector")]
@@ -22,6 +22,8 @@ public class Main : MonoBehaviour
     };
 
     private BoundsCheck bndCheck;
+    
+    public int totalScore = 0;
 
     public void ShipDestroyed(Enemy e)
     {
@@ -36,6 +38,8 @@ public class Main : MonoBehaviour
 
             pu.transform.position = e.transform.position; 
         }
+
+        totalScore += e.score;
     }
     private void Awake()
     {
@@ -81,7 +85,7 @@ public class Main : MonoBehaviour
 
     public void Restart()
     {
-        SceneManager.LoadScene("_Scene_0");
+        SceneManager.LoadScene("_Scene_1");
     }
 
     ///<summary>

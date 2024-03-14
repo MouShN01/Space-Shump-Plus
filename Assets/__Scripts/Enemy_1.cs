@@ -13,7 +13,7 @@ public class Enemy_1 : Enemy
 
     private float x0; //начальные координаты X
     private float birthTime;
-
+    
     void Start()
     {
         x0 = pos.x;

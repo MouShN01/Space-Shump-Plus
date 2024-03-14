@@ -9,28 +9,34 @@ public class Hero : MonoBehaviour
     [Header("Set in Inspector")]
     //Поля, управляющие движением корабля
     public float speed = 30;
+
     public float rollMult = -45;
     public float pitchMult = 30;
     public float gameRestartDelay = 2f;
     public GameObject projectilePrefab;
     public float projectileSpeed = 40;
     public Weapon[] weapons;
+    
+    public AudioSource src;
+    public AudioClip shot;
 
-    [Header("Set Dynamically")]
-    [SerializeField]
+    [Header("Set Dynamically")] [SerializeField]
     private float _shieldLevel = 1;
+
+    private bool isPlayingSound = false;
 
     //Переменная хранящая ссылку на последний обьект столконовения
     private GameObject lastTriggerGO = null;
 
     //Обновление нового делегата типа WeaponFireDelegate
     public delegate void WeaponFireDelegate();
+
     //Создать поле типа WeaponFireDelegate с именем fireDelegate.
     public WeaponFireDelegate fireDelegate;
 
     void Start()
     {
-        if(S == null)
+        if (S == null)
         {
             S = this;
         }
@@ -43,7 +49,7 @@ public class Hero : MonoBehaviour
         ClearWeapons();
         weapons[0].SetType(WeaponType.blaster);
     }
-    
+
     void Update()
     {
         //Извлечение информации из класса Input
@@ -69,18 +75,32 @@ public class Hero : MonoBehaviour
         //Сначала проверить нажатие клавиши: Axis("Jump")
         //Заетм убедиться, что значение fireDelegate не ровно null,
         // чтобы избежать ошибки
-        if (Input.GetAxis("Jump") == 1 && fireDelegate != null)
+        if (Input.GetButton("Jump") && fireDelegate != null)
         {
+            if(!isPlayingSound) StartCoroutine(PlayShootSound());
             fireDelegate();
         }
-
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             Application.Quit();
         }
     }
 
-    void TempFire()
+    public IEnumerator PlayShootSound()
+    {
+        isPlayingSound = true;
+        
+        src.PlayOneShot(shot);
+        
+        while (src.isPlaying)
+        {
+            yield return null;
+        }
+
+        isPlayingSound = false;
+    }
+
+void TempFire()
     {
         GameObject projGO = Instantiate<GameObject>(projectilePrefab);
         projGO.transform.position = transform.position;
