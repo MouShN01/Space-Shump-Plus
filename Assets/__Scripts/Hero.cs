@@ -23,6 +23,8 @@ public class Hero : MonoBehaviour
     [Header("Set Dynamically")] [SerializeField]
     private float _shieldLevel = 1;
 
+    private int _misslesCount = 1;
+
     private bool isPlayingSound = false;
 
     //Переменная хранящая ссылку на последний обьект столконовения
@@ -84,6 +86,16 @@ public class Hero : MonoBehaviour
         {
             Application.Quit();
         }
+
+        if (Input.GetKeyDown(KeyCode.M))
+        {
+            var tempWeapon = weapons;
+            ClearWeapons();
+            weapons[0].SetType(WeaponType.missile);
+            fireDelegate();
+            misslesCount--;
+            weapons = tempWeapon;
+        }
     }
 
     public IEnumerator PlayShootSound()
@@ -91,11 +103,8 @@ public class Hero : MonoBehaviour
         isPlayingSound = true;
         
         src.PlayOneShot(shot);
-        
-        while (src.isPlaying)
-        {
-            yield return null;
-        }
+
+        yield return new WaitForSeconds(weapons[0].def.delayBetweenShots);
 
         isPlayingSound = false;
     }
@@ -146,6 +155,9 @@ void TempFire()
             case WeaponType.shield:
                 shieldLevel++;
                 break;
+            case WeaponType.missile:
+                misslesCount++;
+                break;
             default:
                 if (pu.type == weapons[0].type)
                 {
@@ -177,6 +189,12 @@ void TempFire()
                 Main.S.DelayedRestart(gameRestartDelay);
             }
         }   
+    }
+
+    public int misslesCount
+    {
+        get { return (_misslesCount); }
+        set { _misslesCount = value; }
     }
 
     Weapon GetEmptyWeaponSlot()

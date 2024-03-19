@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -39,9 +40,9 @@ public class WeaponDefinition
 }
 public class Weapon : MonoBehaviour
 {
-    static public Transform PROJECTILE_ANCHOR;
+    public static Transform PROJECTILE_ANCHOR;
 
-    [Header("Set Dynamicaly")]
+    [Header("Set Dynamically")]
     [SerializeField]
     private WeaponType _type = WeaponType.none;
     public WeaponDefinition def;
@@ -58,9 +59,9 @@ public class Weapon : MonoBehaviour
         //WeaponType.none
         SetType(_type);
         //Динамически создать точку привязки для всех снарядов
-        if(PROJECTILE_ANCHOR = null)
+        if(PROJECTILE_ANCHOR == null)
         {
-            GameObject go = new GameObject("_ProjectileAchor");
+            GameObject go = new GameObject("_ProjectileAnchor");
             PROJECTILE_ANCHOR = go.transform;
         }
         //Найти fireDelegate в корневом игровом обьекте
@@ -72,8 +73,8 @@ public class Weapon : MonoBehaviour
     }
     public WeaponType type
     {
-        get { return (_type); }
-        set { SetType(value); }
+        get => (_type);
+        set => SetType(value);
     }
     public void SetType(WeaponType wt)
     {
@@ -123,8 +124,60 @@ public class Weapon : MonoBehaviour
                 p.transform.rotation = Quaternion.AngleAxis(-10, Vector3.back);
                 p.rigid.velocity = p.transform.rotation * vel;
                 break;
+            case WeaponType.phaser:
+                p = MakeProjectile();
+                StartCoroutine(SinusoidalMotion(p, Vector3.left));
+                p.rigid.velocity = vel; 
+                p = MakeProjectile();
+                StartCoroutine(SinusoidalMotion(p, Vector3.right));
+                p.rigid.velocity = vel;
+                break;
+            case WeaponType.missile:
+                p = MakeProjectile();
+                p.transform.rotation = Quaternion.LookRotation(NearestEnemyCords() - transform.position);
+                p.rigid.velocity = p.transform.rotation * vel;
+                break;
         }
     }
+    
+    IEnumerator SinusoidalMotion(Projectile projectile, Vector3 traectory)
+    {
+        Rigidbody rigid = projectile.rigid;
+        
+        while (projectile != null)
+        {
+            float yOffset = Mathf.Sin(Time.time * 10) * 0.5f;
+            Vector3 newPosition = projectile.transform.position + traectory * yOffset;
+            
+            rigid.MovePosition(newPosition);
+            
+            Vector3 direction = newPosition - projectile.transform.position;
+
+            projectile.transform.Rotate(0, 0, direction.x);
+
+            yield return null;
+        }
+    }
+
+    public Vector3 NearestEnemyCords()
+    {
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+        GameObject nearestEnemy = null;
+        float nearestDistance = Mathf.Infinity;
+        Vector3 playerPos = Hero.S.transform.position;
+        foreach (var enemy in enemies)
+        {
+            float distance = Vector3.Distance(enemy.transform.position, playerPos);
+            if (distance < nearestDistance)
+            {
+                nearestEnemy = enemy;
+                nearestDistance = distance;
+            }
+        }
+
+        return nearestEnemy.transform.position;
+    }
+
 
     public Projectile MakeProjectile()
     {
