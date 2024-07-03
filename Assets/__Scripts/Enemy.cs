@@ -1,16 +1,22 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
 
 public class Enemy : MonoBehaviour
 {
     [Header("Set in Inspector: Enemy")]
     public float speed = 10f;
-    public float fireRate = 0.3f;
+    public float fireRate = 6f;
     public float health = 10;
     public int score = 100;
     public float showDamageDuration = 0.1f;
-
+    public delegate void WeaponFireDelegate();
+    public WeaponFireDelegate fireDelegate;
+    public Weapon weapon;
+    public WeaponType weaponType;
+    
     public float powerUpDropChance = 1f;
 
     public GameObject particles;
@@ -35,6 +41,20 @@ public class Enemy : MonoBehaviour
         {
             originalColors[i] = materials[i].color;
         }
+    }
+
+   private void Start()
+    {
+        if (LevelManager.S.level > 1)
+        {
+            weapon.SetType(weaponType);
+            InvokeRepeating("Fire", 0, fireRate/LevelManager.S.level);
+        }
+    }
+
+    public void Fire()
+    {
+        fireDelegate();
     }
 
     public Vector3 pos

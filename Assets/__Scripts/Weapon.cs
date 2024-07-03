@@ -1,7 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Numerics;
 using UnityEngine;
+using Quaternion = UnityEngine.Quaternion;
+using Vector3 = UnityEngine.Vector3;
 
 /// <summary>
 /// Ёто перечесление всех возможных типов оружи€
@@ -70,7 +73,13 @@ public class Weapon : MonoBehaviour
         {
             rootGO.GetComponent<Hero>().fireDelegate += Fire;
         }
+
+        if (rootGO.GetComponent<Enemy>() != null)
+        {
+            rootGO.GetComponent<Enemy>().fireDelegate += Fire;
+        }
     }
+    
     public WeaponType type
     {
         get => (_type);
@@ -98,7 +107,7 @@ public class Weapon : MonoBehaviour
         //≈сли this.gameObject неактивен, выйти
         if (!gameObject.activeInHierarchy) return;
         //≈сли между выстрелами прошло достаточно много времени, выйти
-        if (Time.time - lastShotTime < def.delayBetweenShots)
+        if (Time.time - lastShotTime < def.delayBetweenShots && type != WeaponType.missile)
         {
             return;
         }
@@ -134,8 +143,13 @@ public class Weapon : MonoBehaviour
                 break;
             case WeaponType.missile:
                 p = MakeProjectile();
-                p.transform.rotation = Quaternion.LookRotation(NearestEnemyCords() - transform.position);
-                p.rigid.velocity = p.transform.rotation * vel;
+                StartCoroutine(MoveToEnemy(p, NearestEnemy()));
+                break;
+            case WeaponType.laser:
+                p = MakeProjectile();
+                Vector3 scaleFactor = new Vector3(1, 100, 1);
+                p.transform.localScale = Vector3.Scale(p.transform.localScale, scaleFactor);
+                p.transform.position += new Vector3(0, 50, 0);
                 break;
         }
     }
@@ -159,7 +173,31 @@ public class Weapon : MonoBehaviour
         }
     }
 
-    public Vector3 NearestEnemyCords()
+    IEnumerator MoveToEnemy(Projectile projectile, GameObject nearestEnemy)
+    {
+        Rigidbody rigid = projectile.rigid;
+
+        while (projectile != null && nearestEnemy != null)
+        {
+            Vector3 direction = nearestEnemy.transform.position - projectile.transform.position;
+            direction.Normalize();
+
+            Quaternion targetRotation = Quaternion.LookRotation(direction);
+            
+            projectile.transform.rotation = targetRotation;
+            
+            projectile.transform.Rotate(-90, 0, 0);
+            
+            // projectile.transform.rotation = Quaternion.RotateTowards(projectile.transform.rotation, targetRotation, Time.deltaTime * 1000);
+
+            rigid.velocity = -projectile.transform.up * def.velocity;
+            
+
+            yield return null;
+        }
+    }
+    
+   public GameObject NearestEnemy()
     {
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
         GameObject nearestEnemy = null;
@@ -175,9 +213,8 @@ public class Weapon : MonoBehaviour
             }
         }
 
-        return nearestEnemy.transform.position;
+        return nearestEnemy;
     }
-
 
     public Projectile MakeProjectile()
     {

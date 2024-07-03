@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Hero : MonoBehaviour
@@ -89,16 +91,31 @@ public class Hero : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.M))
         {
-            var tempWeapon = weapons;
-            ClearWeapons();
-            weapons[0].SetType(WeaponType.missile);
-            fireDelegate();
-            misslesCount--;
-            weapons = tempWeapon;
+            if (misslesCount > 0)
+            {
+                var weaponType = weapons[0].type;
+                int weaponCount = 0;
+                foreach (var w in weapons)
+                {
+                    if (w.type != WeaponType.none)
+                    {
+                        weaponCount += 1;
+                    }
+                }
+                ClearWeapons();
+                weapons[0].SetType(WeaponType.missile);
+                fireDelegate();
+                misslesCount--;
+                ClearWeapons();
+                for (int i = 0; i < weaponCount; i++)
+                {
+                    weapons[i].SetType(weaponType);
+                }
+            }
         }
     }
 
-    public IEnumerator PlayShootSound()
+   public IEnumerator PlayShootSound()
     {
         isPlayingSound = true;
         
@@ -122,6 +139,16 @@ void TempFire()
         rigidB.velocity = Vector3.up * tSpeed;
     }
 
+    private void OnCollisionEnter(Collision other)
+    {
+        GameObject otherGO = other.gameObject;
+        if (otherGO.CompareTag("ProjectileEnemy"))
+        {
+            shieldLevel--;
+            Destroy(otherGO); 
+        }
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         Transform rootT = other.gameObject.transform.root;
@@ -132,12 +159,12 @@ void TempFire()
         if (go == lastTriggerGO) return;
         lastTriggerGO = go;
 
-        if(go.tag == "Enemy")
+        if(go.CompareTag("Enemy"))
         {
             shieldLevel--;
             Destroy(go);
         }
-        else if(go.tag == "PowerUp")
+        else if(go.CompareTag("PowerUp"))
         {
             AbsorbPowerUp(go);
         }

@@ -35,8 +35,14 @@ public class Enemy_2 : Enemy
         }
 
         birthTime = Time.time;
+        
+        if (LevelManager.S.level > 1)
+        {
+            weapon.SetType(weaponType);
+            InvokeRepeating("Fire", 0, fireRate/LevelManager.S.level);
+        }
     }
-
+    
     public override void Move()
     {
         // ривые Ѕазье вычисл€ютс€ на основе значени€ u между 0 и 1
