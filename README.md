@@ -12,7 +12,4 @@ Every 1000 points level will be increased and enemy ships will be shooting.
 
 Controls
 -
-WASD - to move your ship
-SPACE - to shoot
-M - to use missile
-ESC - to open menu
+| WASD - to move your ship | SPACE - to shoot | M - to use missile | ESC - to open menu |
