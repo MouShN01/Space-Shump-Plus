@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using __Scripts;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -22,6 +23,8 @@ public class Main : MonoBehaviour
     };
 
     private BoundsCheck bndCheck;
+
+    public GameObject gameOverMenu;
     
     public int totalScore = 0;
 
@@ -76,16 +79,20 @@ public class Main : MonoBehaviour
         pos.y = bndCheck.camHeight + enemyPadding;
         go.transform.position = pos;
 
-        Invoke("SpawnEnemy", 1f / enemySpawnerPerSecond);
+        Invoke(nameof(SpawnEnemy), 1f / enemySpawnerPerSecond);
     }
     public void DelayedRestart(float delay)
     {
-        Invoke("Restart", delay);
+        Invoke(nameof(GameOver), delay);
     }
 
-    public void Restart()
+    public void GameOver()
     {
-        SceneManager.LoadScene("_Scene_1");
+        gameOverMenu = GameObject.Find("Canvas").transform.Find("GameOverMenu").gameObject;
+        if(totalScore > PlayersManager.Instance.currentPlayer.Score)
+            PlayersManager.Instance.currentPlayer.Score = totalScore;
+        gameOverMenu.SetActive(true);
+        Time.timeScale = 0;
     }
 
     ///<summary>
