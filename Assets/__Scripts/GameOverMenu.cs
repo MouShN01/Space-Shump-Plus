@@ -25,12 +25,15 @@ namespace __Scripts
 
         public void Restart()
         {
+            Time.timeScale = 1;
             SceneManager.LoadScene("_Scene_1");
         }
 
         public void Exit()
         {
             Time.timeScale = 1;
+            PlayersManager.Instance.SortPlayersList();
+            SaveManager.Instance.SaveData();
             SceneManager.LoadScene("_Scene_0");
         }
     }

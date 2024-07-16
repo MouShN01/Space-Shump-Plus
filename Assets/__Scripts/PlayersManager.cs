@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 namespace __Scripts
 {
@@ -17,15 +15,23 @@ namespace __Scripts
 
         public void CreatePlayer(string name)
         {
-            currentPlayer = playersList.FirstOrDefault(player => player.Name == name);
+            currentPlayer = playersList.FirstOrDefault(player => player.name == name);
             if (currentPlayer == null)
             {
                 currentPlayer = new Player
                 {
-                    Name = name,
-                    Score = 0
+                    name = name,
+                    score = 0
                 };
                 playersList.Add(currentPlayer);
+            }
+        }
+
+        public void SortPlayersList()
+        {
+            if (playersList != null && playersList.Any())
+            {
+                playersList = playersList.OrderByDescending(player => player.score).ToList();
             }
         }
     }

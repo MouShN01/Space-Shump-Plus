@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using __Scripts;
 using UnityEngine;
 
 public class Hero : MonoBehaviour
