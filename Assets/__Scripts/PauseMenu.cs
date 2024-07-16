@@ -48,8 +48,8 @@ public class PauseMenu : MonoBehaviour
 
     public void PauseGame()
     {
-        scoreText.text = $"Your score {Main.S.totalScore}";
         pauseMenu.SetActive(true);
+        scoreText.text = $"Your score {Main.S.totalScore}";
         Time.timeScale = 0;
         _isPaused = true;
     }
